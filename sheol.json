@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "silence-cut",
+  "description": "Cuts the silence out of a video or audio file and writes what is left",
+  "input": "a media path as the first argument, and where to write it as the second",
+  "output": "the same media without its silences, at the path you passed second",
+  "kind": "module",
+  "tags": ["video", "audio", "ffmpeg", "editing"],
+  "license": "MIT",
+  "requires": ["python>=3.9", "ffmpeg"],
+  "entry": { "cli": "tools/silence_cut.py talk.mp4 tight.mp4" },
+  "cost": { "model": "free" }
+}
