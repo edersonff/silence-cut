@@ -7,7 +7,7 @@
   "kind": "module",
   "tags": ["video", "audio", "ffmpeg", "editing"],
   "license": "MIT",
-  "requires": ["python>=3.9", "ffmpeg"],
+  "requires": ["python>=3.9", "ffmpeg>=4.4"],
   "entry": { "cli": "tools/silence_cut.py talk.mp4 tight.mp4" },
   "cost": { "model": "free" }
 }
