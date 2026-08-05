@@ -1,0 +1,2 @@
+# stdlib only (argparse, subprocess, json, re, shutil, pathlib)
+# ffmpeg is a system binary, not a pip package
