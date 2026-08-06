@@ -5,9 +5,22 @@
   "input": "a media path as the first argument, and where to write it as the second",
   "output": "the same media without its silences, at the path you passed second",
   "kind": "module",
-  "tags": ["video", "audio", "ffmpeg", "editing"],
+  "tags": [
+    "video",
+    "audio",
+    "ffmpeg",
+    "editing"
+  ],
   "license": "MIT",
-  "requires": ["python>=3.9", "ffmpeg>=4.4"],
-  "entry": { "cli": "tools/silence_cut.py talk.mp4 tight.mp4" },
-  "cost": { "model": "free" }
+  "requires": [
+    "python>=3.9",
+    "ffmpeg>=4.4"
+  ],
+  "entry": {
+    "cli": "tools/silence_cut.py talk.mp4 tight.mp4"
+  },
+  "cost": {
+    "model": "free"
+  },
+  "example": "test.mp4"
 }
