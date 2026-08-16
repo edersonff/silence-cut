@@ -64,3 +64,18 @@ class CoverArtTest(unittest.TestCase):
 
     def test_garbage_probe_is_not_video(self):
         self.assertFalse(silence_cut.real_video_streams("not json at all"))
+
+
+class KeptSpansTest(unittest.TestCase):
+    def test_json_carries_kept_spans(self):
+        import json as J
+        import subprocess
+        import sys as S
+        r = subprocess.run(
+            [S.executable, "tools/silence_cut.py", "/tmp/podcast-clip/clip.wav",
+             "/tmp/podcast-clip/spans-probe.wav", "--json"],
+            capture_output=True, text=True, cwd="/tmp/sheol/edersonff/silence-cut")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        out = J.loads(r.stdout)
+        self.assertIn("kept_spans", out, "the clip workflow maps word timings through these")
+        self.assertTrue(all(a < b for a, b in out["kept_spans"]))

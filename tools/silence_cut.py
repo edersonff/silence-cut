@@ -146,7 +146,8 @@ def main():
 
     kept = sum(b - a for a, b in spoken)
     answer = {"state": "cut", "from": round(total, 2), "to": round(kept, 2),
-              "removed": round(total - kept, 2), "cuts": len(quiet), "target": said.target}
+              "removed": round(total - kept, 2), "cuts": len(quiet), "target": said.target,
+              "kept_spans": [[round(a, 3), round(b, 3)] for a, b in spoken]}
     if said.json:
         print(json.dumps(answer, indent=2))
     else:
