@@ -59,17 +59,28 @@ def keeps(quiet, total, pad):
     return [(a, b) for a, b in spoken if b - a > 0.05]
 
 
-def cut(source, target, spoken, has_sound):
+def cut(source, target, spoken, has_sound, has_video=True):
     pieces = "".join(
-        f"[0:v]trim={a}:{b},setpts=PTS-STARTPTS[v{i}];" +
+        (f"[0:v]trim={a}:{b},setpts=PTS-STARTPTS[v{i}];" if has_video else "") +
         (f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS[a{i}];" if has_sound else "")
         for i, (a, b) in enumerate(spoken)
     )
-    joins = "".join(f"[v{i}]" + (f"[a{i}]" if has_sound else "") for i in range(len(spoken)))
-    graph = f"{pieces}{joins}concat=n={len(spoken)}:v=1:a={1 if has_sound else 0}[v]"
+    joins = "".join(
+        (f"[v{i}]" if has_video else "") + (f"[a{i}]" if has_sound else "")
+        for i in range(len(spoken))
+    )
+    v = 1 if has_video else 0
+    a = 1 if has_sound else 0
+    graph = f"{pieces}{joins}concat=n={len(spoken)}:v={v}:a={a}"
+    if v:
+        graph += "[v]"
+    if a:
+        graph += "[a]"
     command = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(source),
-               "-filter_complex", graph + ("[a]" if has_sound else ""), "-map", "[v]"]
-    if has_sound:
+               "-filter_complex", graph]
+    if v:
+        command += ["-map", "[v]"]
+    if a:
         command += ["-map", "[a]"]
     return run(command + [str(target)])
 
@@ -102,6 +113,8 @@ def main():
 
     has_sound = bool(run(["ffprobe", "-v", "error", "-select_streams", "a",
                           "-show_entries", "stream=index", "-of", "csv=p=0", str(source)]).stdout.strip())
+    has_video = bool(run(["ffprobe", "-v", "error", "-select_streams", "v",
+                          "-show_entries", "stream=index", "-of", "csv=p=0", str(source)]).stdout.strip())
     if not has_sound:
         die(f"{source} has no audio track", "there is no silence to find without sound", said.json)
 
@@ -112,7 +125,7 @@ def main():
     if not quiet:
         die(f"{source} has no silence longer than {said.longer_than}s", "raise --longer-than or --quiet-below", said.json, code=2)
 
-    wrote = cut(source, Path(said.target), spoken, has_sound)
+    wrote = cut(source, Path(said.target), spoken, has_sound, has_video)
     if wrote.returncode != 0:
         die(f"{said.target} could not be written", wrote.stderr.strip().splitlines()[-1] if wrote.stderr.strip() else "ffmpeg said nothing", said.json)
 
