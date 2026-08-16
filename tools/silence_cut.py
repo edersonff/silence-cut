@@ -60,6 +60,10 @@ def keeps(quiet, total, pad):
 
 
 def cut(source, target, spoken, has_sound, has_video=True):
+    return run(cut_command(source, target, spoken, has_sound, has_video))
+
+
+def cut_command(source, target, spoken, has_sound, has_video):
     pieces = "".join(
         (f"[0:v]trim={a}:{b},setpts=PTS-STARTPTS[v{i}];" if has_video else "") +
         (f"[0:a]atrim={a}:{b},asetpts=PTS-STARTPTS[a{i}];" if has_sound else "")
@@ -82,7 +86,7 @@ def cut(source, target, spoken, has_sound, has_video=True):
         command += ["-map", "[v]"]
     if a:
         command += ["-map", "[a]"]
-    return run(command + [str(target)])
+    return command + [str(target)]
 
 
 def main():
