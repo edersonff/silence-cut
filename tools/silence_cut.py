@@ -59,7 +59,17 @@ def keeps(quiet, total, pad):
     return [(a, b) for a, b in spoken if b - a > 0.05]
 
 
-def cut(source, target, spoken, has_sound, has_video=True):
+def real_video_streams(ffprobe_json):
+    # cover art is a video stream to ffprobe, but mounting it in the filter
+    # graph fails at write time — an mp3 with art is audio to the listener
+    try:
+        streams = json.loads(ffprobe_json).get("streams", [])
+    except ValueError:
+        return False
+    return any(s.get("disposition", {}).get("attached_pic", 0) != 1 for s in streams)
+
+
+def cut(source, target, spoken, has_sound, has_video):
     return run(cut_command(source, target, spoken, has_sound, has_video))
 
 
@@ -117,8 +127,9 @@ def main():
 
     has_sound = bool(run(["ffprobe", "-v", "error", "-select_streams", "a",
                           "-show_entries", "stream=index", "-of", "csv=p=0", str(source)]).stdout.strip())
-    has_video = bool(run(["ffprobe", "-v", "error", "-select_streams", "v",
-                          "-show_entries", "stream=index", "-of", "csv=p=0", str(source)]).stdout.strip())
+    has_video = real_video_streams(
+        run(["ffprobe", "-v", "error", "-select_streams", "v",
+             "-show_streams", "-of", "json", str(source)]).stdout)
     if not has_sound:
         die(f"{source} has no audio track", "there is no silence to find without sound", said.json)
 

@@ -46,3 +46,21 @@ class GraphTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CoverArtTest(unittest.TestCase):
+    def test_cover_art_is_not_video(self):
+        probe = '{"streams":[{"codec_name":"mjpeg","disposition":{"attached_pic":1}}]}'
+        self.assertFalse(silence_cut.real_video_streams(probe))
+
+    def test_real_video_stream_is_video(self):
+        probe = '{"streams":[{"codec_name":"h264","disposition":{"attached_pic":0}}]}'
+        self.assertTrue(silence_cut.real_video_streams(probe))
+
+    def test_mixed_art_and_real_video_counts_as_video(self):
+        probe = ('{"streams":[{"codec_name":"mjpeg","disposition":{"attached_pic":1}},'
+                 '{"codec_name":"h264","disposition":{"attached_pic":0}}]}')
+        self.assertTrue(silence_cut.real_video_streams(probe))
+
+    def test_garbage_probe_is_not_video(self):
+        self.assertFalse(silence_cut.real_video_streams("not json at all"))
